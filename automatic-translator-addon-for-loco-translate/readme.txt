@@ -3,10 +3,10 @@ Contributors: narinder-singh, satindersingh
 Donate link: https://paypal.me/CoolPlugins/10USD/
 Tags: translate, translation, translator, localization, loco, loco translate, loco addon, google translate, deepl
 Requires at least:5.0
-Tested up to:6.4.3
+Tested up to:6.5.2
 Requires PHP: 5.6
-Loco Translate Tested Up to: 2.6.6
-Stable tag: 2.4.1
+Loco Translate Tested Up to: 2.6.7
+Stable tag: 2.4.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,8 @@ The Automatic Translate Addon for Loco Translate is a powerful tool for website 
 The plugin integrates with the **Loco Translate** plugin to provide a seamless experience for users. The addon uses **machine translation** to **automatically translate** the plugin and theme strings into the desired language, **saving time and effort** for website owners who need to quickly translate their content into multiple languages.
 
 [How It Works ⇗](https://locoaddon.com/how-it-works/?utm_source=atlt_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=how_it_works) | [Buy Pro ⇗](https://locoaddon.com/plugin/automatic-translate-addon-for-loco-translate-pro/?utm_source=atlt_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=buy_now)
+
+https://www.youtube.com/watch?v=X_1RbSVgnOc
 
 Install this plugin along with the famous **[Loco Translate](https://wordpress.org/plugins/loco-translate/)** plugin (**1,000,000+ Active Installations**) and automatically machine translates any WordPress plugin or theme translation files into any language.
 The Automatic Translate Addon for Loco Translate is a must-have tool for anyone looking for a seamless, efficient, and high-quality solution to translate their WordPress plugins and themes.
@@ -147,6 +149,11 @@ There is no limit. Yes, you can translate unlimited characters without any API k
 4. DeepL Doc Translator (Premium)
 
 == Changelog ==
+<strong>Version 2.4.2 |01/05/2024 </strong>
+<pre>
+Added: Support for Portuguese(Brazil)
+Added: CSS for RTL support
+</pre>
 <strong>Version 2.4.1 |07/02/2024 </strong>
 <pre>
 Fix: Minor bug fixes
