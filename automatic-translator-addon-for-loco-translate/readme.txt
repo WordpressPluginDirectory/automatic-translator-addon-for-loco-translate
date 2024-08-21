@@ -1,16 +1,16 @@
 === Automatic Translate Addon For Loco Translate ===
 Contributors: narinder-singh, satindersingh
 Donate link: https://paypal.me/CoolPlugins/10USD/
-Tags: translate, translation,  loco translate, google translate, chatgpt translate
+Tags: translate, AI Translation, Loco Translate Addon, google translate,ChatGPT Integration
 Requires at least:5.0
 Tested up to:6.6
 Requires PHP: 5.6
 Loco Translate Tested Up to: 2.6.11
-Stable tag: 2.4.3
+Stable tag: 2.4.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Automatic language translator add-on for Loco Translate official plugin to translate WordPress plugins and themes translation / PO files automatically.
+Automatic language translator addon for Loco Translate to translate WordPress plugins and themes translation / PO files automatically.
 
 == Description ==
 
@@ -39,6 +39,22 @@ The Automatic Translate Addon for Loco Translate is a must-have tool for anyone 
 * After auto translations, you can manually edit any machine-translated string inside Loco's built-in editor.
 
 > “If you spend too much time thinking about a thing, you'll never get it done. Stop wasting time, complete work smartly & quickly!”
+
+https://youtu.be/yNuOVKfwFcE?si=4hQResLF76ntAvzb
+
+https://youtu.be/6k8K6ZU2Rvo?si=UdiJr0n5zTwaDfXR
+
+The Automatic Translate Addon for Loco Translate now includes powerful new AI translation options: <strong>ChatGPT</strong> and <strong>Gemini AI</strong>. These integrations provide advanced, high-quality translations for your WordPress plugins and themes, leveraging the latest in AI technology.
+
+**Key Benefits**
+
+* **ChatGPT Translation:** ChatGPT brings conversational AI capabilities to your translation needs. It understands context better and provides more accurate translations, especially for complex phrases and sentences. This ensures your translated content is both natural and coherent.
+
+* **Gemini AI Translation:** Gemini AI offers state-of-the-art translation quality, known for its precision and fluency. It uses deep learning algorithms to deliver translations that are not only accurate but also contextually relevant, making it ideal for professional-grade translation tasks.
+
+* **Enhanced Accuracy:** Both ChatGPT and Gemini provide translations with improved accuracy and context understanding.
+* **Natural Language:** The AI models generate translations that sound natural and human-like.
+* **Time-Saving:** Automate your translation process with high efficiency and reliability.
 
 ### 🌟 FREE v/s Premium Addon Comparison
 
@@ -72,15 +88,6 @@ The Automatic Translate Addon for Loco Translate is a must-have tool for anyone 
 > DeepL Doc Translator provides a limited number of free docs translations per day, you can purchase their pro license to increase this limit.
 
 
-
-**Use AI(ChatGPT) to Quickly Translate Your Plugins and Themes Easily**
-
-https://youtu.be/yNuOVKfwFcE?si=4hQResLF76ntAvzb
-
-**Use Google Gemini to Quickly Translate Your Plugins and Themes Easily**
-
-https://youtu.be/6k8K6ZU2Rvo?si=UdiJr0n5zTwaDfXR
-
 > “Many people make the mistake of saving money by wasting time.”
 
 
@@ -89,6 +96,17 @@ In addition to its efficiency and ease of use, the Automatic Translate Addon als
 **❗ Important Notice:** This addon only provides settings to use third-party auto-translation widgets and services(Yandex, Google, DeepL, etc.), it does not provide any translation service. So we don't guarantee 100% correctness, please check all translated text carefully before making it live on your production site. If any auto-translate provider stops providing auto-translation widgets or services in the future, in that case, the plugin will not support that translation provider.
 
 > **Important Notice:-** This plugin works as an auto-translate addon for the Loco Translate official plugin latest version(2.4.4 or higher).
+
+Check out our new [Automatic Translations For Polylang](https://coolplugins.net/product/automatic-translations-for-polylang/?utm_source=atlt_plugin&utm_medium=readme&utm_campaign=cross_promotion&utm_content=check_out)
+
+[Automatic Translations For Polylang](https://coolplugins.net/product/automatic-translations-for-polylang/?utm_source=atlt_plugin&utm_medium=readme&utm_campaign=cross_promotion&utm_content=check_out)  is a powerful addon that streamlines the process of translating WordPress content. By automatically copying and translating posts, including titles, content, images, and meta fields, this plugin helps you efficiently manage multilingual websites. Compatible with Gutenberg and popular third-party blocks, it preserves all styles and formats, ensuring a consistent look across languages. 
+
+Check out our [Automatic Translate Addon For TranslatePress](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=atlt_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=check_out)
+
+Check out our [Automatic Translate Addon For TranslatePress](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=atlt_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=check_out) helps you to translate entire page content with one click. You don’t need to translate page content manually one by one.
+
+
+
 
 ### 😎 Who's Behind
 
@@ -147,6 +165,19 @@ There is no limit. Yes, you can translate unlimited characters without any paid 
 
 > This addon only provides an interface to use third-party translation widgets and services, it does not provide any translation service. Any auto-translate provider can stop providing free translation widgets or services anytime in the future, in that case, the plugin will not support that auto-translate provider.
 
+= What are the benefits of using ChatGPT for translations?❔ =
+ChatGPT excels in understanding context and generating natural-sounding translations. It's particularly good at handling complex phrases and maintaining the intended tone and meaning of the original text.
+
+= How does Gemini AI improve translation quality?❔ =
+Gemini AI uses advanced deep learning techniques to provide translations that are highly accurate and contextually appropriate. It ensures that the translated text is fluent and professional.
+
+= Do I need any API key to use Gemini AI translations?❔ =
+
+Yes, to access Gemini AI translations, you will need to obtain Free API keys and this key can be entered in the plugin settings.
+
+= Do I need any API key to use ChatGPT translations?❔ =
+ No, you can use ChatGPT translations for free by visiting the [ChatGPT website](https://chatgpt.com/).
+ 
 == Screenshots ==
 
 1. Automatic Translate (No paid API Required)
@@ -155,6 +186,10 @@ There is no limit. Yes, you can translate unlimited characters without any paid 
 4. DeepL Doc Translator (Premium)
 
 == Changelog ==
+<strong>Version 2.4.4 |21/08/2024 </strong>
+<pre>
+Tweaks:Textual changes on dashboard page and readme file.
+</pre>
 <strong>Version 2.4.3 |22/07/2024 </strong>
 <pre>
 Added:Gemini translation button inside popup.
