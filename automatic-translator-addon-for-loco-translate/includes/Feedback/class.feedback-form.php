@@ -11,7 +11,7 @@ if ( ! class_exists( 'ATLT_FeedbackForm' ) ) {
 		private $plugin_version = ATLT_VERSION;
 		private $plugin_name    = 'Loco Automatic Translate Addon';
 		private $plugin_slug    = 'atlt';
-		private $feedback_url   = 'http://feedback.coolplugins.net/wp-json/coolplugins-feedback/v1/feedback';
+		private $feedback_url   = ATLT_FEEDBACK_API.'wp-json/coolplugins-feedback/v1/feedback';
 
 		/*
 		|-----------------------------------------------------------------|
@@ -72,7 +72,7 @@ if ( ! class_exists( 'ATLT_FeedbackForm' ) ) {
 			);
 
 			?>
-		<div id="cool-plugins-deactivate-feedback-dialog-wrapper" class="hide-feedback-popup">
+		<div id="cool-plugins-deactivate-feedback-dialog-wrapper" class="hide-feedback-popup" data-slug="<?php echo esc_attr( $this->plugin_slug ); ?>">
 						
 			<div class="cool-plugins-deactivation-response">
 			<div id="cool-plugins-deactivate-feedback-dialog-header">
@@ -103,11 +103,11 @@ if ( ! class_exists( 'ATLT_FeedbackForm' ) ) {
 							<?php endif; ?>
 						</div>
 					<?php endforeach; ?>
-					<input class="cool-plugins-GDPR-data-notice" id="cool-plugins-GDPR-data-notice" type="checkbox"><label for="cool-plugins-GDPR-data-notice"><?php echo __( 'I consent to having <a href="https://coolplugins.net" target="_blank">Cool Plugins</a> store my email-id and other information submitted via this form, they can also respond to my inquiry.', 'cool-plugins' ); ?></label>
+					<input class="cool-plugins-GDPR-data-notice" id="cool-plugins-GDPR-data-notice-<?php echo $this->plugin_slug; ?>" type="checkbox"><label for="cool-plugins-GDPR-data-notice"><?php echo __( 'I agree to share anonymous usage data and basic site details (such as server, PHP, and WordPress versions) to support Automatic Translate Addon for Loco Translate improvement efforts. Additionally, I allow Cool Plugins to store all information provided through this form and to respond to my inquiry', 'cool-plugins' ); ?></label>
 				</div>
 				<div class="cool-plugin-popup-button-wrapper">
-					<a class="cool-plugins-button button-deactivate" id="cool-plugin-submitNdeactivate">Submit and Deactivate</a>
-					<a class="cool-plugins-button" id="cool-plugin-skipNdeactivate">Skip and Deactivate</a>
+					<a class="cool-plugins-button button-deactivate" id="atlt-cool-plugin-submitNdeactivate">Submit and Deactivate</a>
+					<a class="cool-plugins-button" id="atlt-cool-plugin-skipNdeactivate">Skip and Deactivate</a>
 				</div>
 			</form>
 			</div>
@@ -146,16 +146,25 @@ if ( ! class_exists( 'ATLT_FeedbackForm' ) ) {
 					),
 				);
 
+				$plugin_initial =  get_option( 'atlt_initial_save_version' );
 				$deativation_reason = array_key_exists( $reason, $deactivate_reasons ) ? $reason : 'other';
 
 				$sanitized_message = sanitize_text_field( $_POST['message'] ) == '' ? 'N/A' : sanitize_text_field( $_POST['message'] );
 				$admin_email       = sanitize_email( get_option( 'admin_email' ) );
+				$site_url       = get_site_url();
+				$install_date   = get_option('atlt-install-date');
+				$unique_key     = '8';  // Ensure this key is unique per plugin to prevent collisions when site URL and install date are the same across plugins
+				$site_id        = $site_url . '-' . $install_date . '-' . $unique_key;
 				$site_url          = esc_url( site_url() );
 				$response          = wp_remote_post(
 					$this->feedback_url,
 					array(
 						'timeout' => 30,
-						'body'    => array(
+							'body'    => array(
+							'site_id' => md5($site_id),
+							'server_info' => serialize(LocoAutoTranslateAddon::atlt_get_user_info()['server_info']),
+							'extra_details' => serialize(LocoAutoTranslateAddon::atlt_get_user_info()['extra_details']),
+							'plugin_initial'  => isset($plugin_initial) ? sanitize_text_field($plugin_initial) : 'N/A',
 							'plugin_version' => $this->plugin_version,
 							'plugin_name'    => $this->plugin_name,
 							'reason'         => $deativation_reason,

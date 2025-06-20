@@ -23,5 +23,4 @@ class Helpers{
             return $type='pro';
         }  
     }
-   
 }

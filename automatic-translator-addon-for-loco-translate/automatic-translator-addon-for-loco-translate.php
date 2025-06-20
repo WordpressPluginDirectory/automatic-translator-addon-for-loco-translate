@@ -2,7 +2,7 @@
 /*
 Plugin Name: Automatic Translate Addon For Loco Translate
 Description: Loco Translate plugin addon to automatic translate plugins and themes translatable string with one click in any language.
-Version: 2.4.8
+Version: 2.4.11
 License: GPL2
 Text Domain: loco-auto-translate
 Domain Path: languages
@@ -17,7 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'ATLT_FILE', __FILE__ );
 define( 'ATLT_URL', plugin_dir_url( ATLT_FILE ) );
 define( 'ATLT_PATH', plugin_dir_path( ATLT_FILE ) );
-define( 'ATLT_VERSION', '2.4.8' );
+define( 'ATLT_VERSION', '2.4.11' );
+define('ATLT_FEEDBACK_API',"https://feedback.coolplugins.net/");
 
 /**
  * @package Loco Automatic Translate Addon
@@ -54,6 +55,13 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 		 * Constructor.
 		 */
 		public function __construct() {
+
+			// Initialize cron
+			$this->init_cron();
+
+			// Initialize feedback notice
+			$this->init_feedback_notice();
+
 			// Add CPT Dashboard initialization
 			if (!class_exists('Atlt_Dashboard')) {
 				require_once ATLT_PATH . 'admin/cpt_dashboard/cpt_dashboard.php';
@@ -69,6 +77,8 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 			$thisPlugin = self::$instance;
 			register_activation_hook( ATLT_FILE, array( $thisPlugin, 'atlt_activate' ) );
 			register_deactivation_hook( ATLT_FILE, array( $thisPlugin, 'atlt_deactivate' ) );
+
+			add_action('admin_init', array($thisPlugin, 'atlt_do_activation_redirect'));
 
 			// run actions and filter only at admin end.
 			if ( is_admin() ) {
@@ -128,6 +138,62 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 
 		/*
 		|----------------------------------------------------------------------
+		| Initialize cron
+		|----------------------------------------------------------------------
+		*/
+		public function init_cron(){
+			require_once ATLT_PATH . '/admin/feedback/cron/atlt-cron.php';
+			$cron = new ATLT_cronjob();
+			$cron->atlt_cron_init_hooks();
+		}
+
+		/*
+		|----------------------------------------------------------------------
+		| Initialize feedback notice
+		|----------------------------------------------------------------------
+		*/
+		public function init_feedback_notice() {
+			if (is_admin()) {
+
+				if(!class_exists('CPFM_Feedback_Notice')){
+					require_once ATLT_PATH . '/admin/feedback/cpfm-common-notice.php';
+					
+				}
+
+			add_action('cpfm_register_notice', function () {
+                if (!class_exists('CPFM_Feedback_Notice') || !current_user_can('manage_options')) {
+                    return;
+                }
+				
+                $notice = [
+                    'title' => __('Automatic Translate Addon for Loco Translate', 'loco-auto-translate'),
+                    'message' => __('Help us make this plugin more compatible with your site by sharing non-sensitive site data.', 'loco-auto-translate'),
+                    'pages' => ['loco-atlt-dashboard'],
+                    'always_show_on' => ['loco-atlt-dashboard'], // This enables auto-show
+                    'plugin_name'=>'atlt'
+                ];
+                CPFM_Feedback_Notice::cpfm_register_notice('cool_translations', $notice);
+                    if (!isset($GLOBALS['cool_plugins_feedback'])) {
+                        $GLOBALS['cool_plugins_feedback'] = [];
+                    }
+                    $GLOBALS['cool_plugins_feedback']['cool_translations'][] = $notice;
+            });
+
+            add_action('cpfm_after_opt_in_atlt', function($category) {
+                if ($category === 'cool_translations') {
+                    ATLT_cronjob::atlt_send_data();
+					$options = get_option('atlt_feedback_opt_in');
+					$options = 'yes';
+					update_option('atlt_feedback_opt_in', $options);	
+                }
+            });
+			}
+		}
+		
+			
+
+		/*
+		|----------------------------------------------------------------------
 		| Auto Translate Request handler
 		|----------------------------------------------------------------------
 		*/
@@ -163,7 +229,9 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 			$lang       = sanitize_text_field( $locale->lang );
 			$region     = sanitize_text_field( $locale->region );
 			$project_id = $domain . '-' . $lang . '-' . $region;
-
+			if($domain === 'temp' && !empty(get_transient('loco_current_translation'))){
+                $project_id = !empty(get_transient('loco_current_translation'))?get_transient('loco_current_translation'):'temp';
+            }
 
 
 
@@ -182,16 +250,12 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 			}
 
 			if ( ! empty( $allStrings ) ) {
-				$character_count = 0;
-				$string_count = 0;
 				foreach ( $items as $i => $item ) {
 					// Find the index of the source string in the cached strings
 					$index = array_search( $item['source'], array_column( $allStrings, 'source' ) );
 
 					if (is_numeric($index) && isset($allStrings[$index]['target'])) {
 						$targets[$i] = sanitize_text_field($allStrings[$index]['target']);
-						$character_count += strlen($item['source']);
-						$string_count++;
 					} else {
 						$targets[$i] = '';
 					}
@@ -257,6 +321,7 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 				);
 
 				// Save the combined data in transient
+				set_transient('loco_current_translation',$_POST['project-id'], 5 * MINUTE_IN_SECONDS);
 				$rs = set_transient( $projectId, $dataToStore, 5 * MINUTE_IN_SECONDS );
 				echo json_encode(
 					array(
@@ -523,6 +588,58 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 			}
 		}
 
+		static function atlt_get_user_info() {
+			global $wpdb;
+			// Server and WP environment details
+			$server_info = [
+				'server_software'        => isset($_SERVER['SERVER_SOFTWARE']) ? sanitize_text_field($_SERVER['SERVER_SOFTWARE']) : 'N/A',
+				'mysql_version'          => $wpdb ? sanitize_text_field($wpdb->get_var("SELECT VERSION()")) : 'N/A',
+				'php_version'            => sanitize_text_field(phpversion() ?: 'N/A'),
+				'wp_version'             => sanitize_text_field(get_bloginfo('version') ?: 'N/A'),
+				'wp_debug'               => (defined('WP_DEBUG') && WP_DEBUG) ? 'Enabled' : 'Disabled',
+				'wp_memory_limit'        => sanitize_text_field(ini_get('memory_limit') ?: 'N/A'),
+				'wp_max_upload_size'     => sanitize_text_field(ini_get('upload_max_filesize') ?: 'N/A'),
+				'wp_permalink_structure' => sanitize_text_field(get_option('permalink_structure') ?: 'Default'),
+				'wp_multisite'           => is_multisite() ? 'Enabled' : 'Disabled',
+				'wp_language'            => sanitize_text_field(get_option('WPLANG') ?: get_locale()),
+				'wp_prefix'              => isset($wpdb->prefix) ? sanitize_key($wpdb->prefix) : 'N/A',
+			];
+			// Theme details
+			$theme = wp_get_theme();
+			$theme_data = [
+				'name'      => sanitize_text_field($theme->get('Name')),
+				'version'   => sanitize_text_field($theme->get('Version')),
+				'theme_uri' => esc_url($theme->get('ThemeURI')),
+			];
+			// Ensure plugin functions are loaded
+			if ( ! function_exists('get_plugins') ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			// Active plugins details
+			$active_plugins = get_option('active_plugins', []);
+			$plugin_data = [];
+			foreach ( $active_plugins as $plugin_path ) {
+				
+				$plugin_info = get_plugin_data(WP_PLUGIN_DIR . '/' . sanitize_text_field($plugin_path));
+				
+				$author_url = ( isset( $plugin_info['AuthorURI'] ) && !empty( $plugin_info['AuthorURI'] ) ) ? esc_url( $plugin_info['AuthorURI'] ) : 'N/A';
+				$plugin_url = ( isset( $plugin_info['PluginURI'] ) && !empty( $plugin_info['PluginURI'] ) ) ? esc_url( $plugin_info['PluginURI'] ) : '';
+	
+				$plugin_data[] = [
+					'name'       => sanitize_text_field($plugin_info['Name']),
+					'version'    => sanitize_text_field($plugin_info['Version']),
+				   'plugin_uri' => !empty($plugin_url) ? $plugin_url : $author_url,
+				];
+			}
+			return [
+				'server_info'   => $server_info,
+				'extra_details' => [
+					'wp_theme'       => $theme_data,
+					'active_plugins' => $plugin_data,
+				],
+			];
+		}
+
 		/*
 		|------------------------------------------------------------------------
 		|  Enqueue required JS file
@@ -537,6 +654,16 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 					array(),
 					ATLT_VERSION,
 					'all'
+				);
+			}
+
+			if (isset($_GET['page']) && $_GET['page'] === 'loco-atlt-dashboard') {
+				wp_enqueue_script(
+					'atlt-dashboard-script',
+					ATLT_URL . 'admin/atlt-dashboard/js/atlt-data-share-setting.js',
+					array('jquery'),
+					ATLT_VERSION,
+					true
 				);
 			}
 			// Keep existing editor page scripts
@@ -620,10 +747,54 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 		|------------------------------------------------------
 		*/
 		public function atlt_activate() {
+
+			$active_plugins = get_option('active_plugins', array());
+            if (!in_array("loco-automatic-translate-addon-pro/loco-automatic-translate-addon-pro.php", $active_plugins)) {
+                add_option('atlt_do_activation_redirect', true);
+            }
+
 			update_option( 'atlt-version', ATLT_VERSION );
 			update_option( 'atlt-installDate', gmdate( 'Y-m-d h:i:s' ) );
 			update_option( 'atlt-type', 'free' );
+
+			if(!get_option('atlt-install-date')) {
+				add_option('atlt-install-date', gmdate('Y-m-d h:i:s'));
+			}
+
+			if (!get_option('atlt_initial_save_version')) {
+				add_option('atlt_initial_save_version', ATLT_VERSION);
+			}
+
+			$get_opt_in = get_option('atlt_feedback_opt_in');
+
+			if ($get_opt_in =='yes' && !wp_next_scheduled('atlt_extra_data_update')) {
+
+				wp_schedule_event(time(), 'every_30_days', 'atlt_extra_data_update');
+			}
+			
 		}
+
+		/*
+		|-------------------------------------------------------
+		|    Redirect to plugin page after activation
+		|-------------------------------------------------------
+		*/
+		public function atlt_do_activation_redirect() {
+			if (get_option('atlt_do_activation_redirect', false)) {
+                update_option('atlt_do_activation_redirect', false);
+				if (!isset($_GET['activate-multi'])) {
+					wp_safe_redirect(admin_url('admin.php?page=loco-atlt-dashboard'));
+					exit;
+				}
+			}
+			if(!get_option('atlt-install-date')) {
+				add_option('atlt-install-date', gmdate('Y-m-d h:i:s'));
+			}
+
+			if (!get_option('atlt_initial_save_version')) {
+				add_option('atlt_initial_save_version', ATLT_VERSION);
+			}
+		}	
 
 		/*
 		|-------------------------------------------------------
@@ -634,6 +805,8 @@ if ( ! class_exists( 'LocoAutoTranslateAddon' ) ) {
 			delete_option( 'atlt-version' );
 			delete_option( 'atlt-installDate' );
 			delete_option( 'atlt-type' );
+
+			wp_clear_scheduled_hook('atlt_extra_data_update');
 		}
 
 		/*
