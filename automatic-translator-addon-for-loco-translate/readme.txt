@@ -3,10 +3,10 @@ Contributors: narinder-singh, satindersingh, coolplugins
 Donate link: https://paypal.me/CoolPlugins/10USD/
 Tags: AI translation, google translate, translate, chatgpt, multilingual
 Requires at least:5.0
-Tested up to: 6.8.3
+Tested up to: 6.9
 Requires PHP: 7.2
 Loco Translate Tested Up to: 2.8.2
-Stable tag: 2.5.4
+Stable tag: 2.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,7 +79,7 @@ Loco Translate is primarily a manual translation tool for translating WordPress 
 
 * **[AI Translation for TranslatePress](https://coolplugins.net/product/automatic-translate-addon-for-translatepress-pro/?utm_source=atlt_plugin&utm_medium=readme&utm_campaign=get_pro&utm_content=tpa_check_out)** is a powerful addon that enhances the functionality of the TranslatePress plugin. This addon uses advanced translation services, like Google Translate, Yandex, and Chrome AI translator, to provide accurate and instant translations for your web pages automatically.
 
-* **[Linguator – Multilingual AI Translation](https://go.coolplugins.net/ai-multilingual)** is a powerful multilingual plugin that helps you create and manage multilingual content on your WordPress website. Easily translate your **posts, pages, menus,** and **categories** into different languages using AI and connect with visitors worldwide.
+* **[Linguator – Multilingual AI Translation](https://wordpress.org/plugins/translate-words/)** is a powerful multilingual plugin that helps you create and manage multilingual content on your WordPress website. Easily translate your **posts, pages, menus,** and **categories** into different languages using AI and connect with visitors worldwide.
 
 ### Special THANKS!
 
@@ -159,6 +159,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Free License v/s Premium License
 
 == Changelog ==
+
+= Version 2.6 - 19/1/2026 =
+* **Fixed:** Fixed issues reported by “Plugin Check” plugin.
+* **Improved:** Enhanced recommendations for other useful plugins.
+* **Removed:** Extra Code.
+
+= Version 2.5.5 - 14/11/2025 =
+* **Fixed:** Syntex Error.
 
 = Version 2.5.4 - 31/10/2025 =
 * **Minor:** Textual changes.
