@@ -34,6 +34,22 @@ jQuery(function ($) {
                 .text('Missing required data. Please reload the page.');
             return;
         }
+
+        // Whitelist of allowed plugin slugs - Security validation
+        const allowedPlugins = [
+            'autopoly-ai-translation-for-polylang-pro',
+            'automatic-translations-for-polylang',
+            'automatic-translate-addon-pro-for-translatepress',
+            'automatic-translate-addon-for-translatepress',
+            'translate-words'
+        ];
+
+        // Validate that the plugin slug is in the whitelist
+        if (allowedPlugins.indexOf(slug) === -1) {
+            $wrapper.find('.atlt-install-message')
+                .text('This plugin is not allowed to be installed via this interface.');
+            return;
+        }
     
         const originalText = button.text();
     
@@ -89,6 +105,8 @@ jQuery(function ($) {
                             errorMessage = response.data;
                         } else if (response.data.message) {
                             errorMessage = response.data.message;
+                        } else if (response.data.errorMessage) {
+                            errorMessage = response.data.errorMessage;
                         }
                     }
                 }

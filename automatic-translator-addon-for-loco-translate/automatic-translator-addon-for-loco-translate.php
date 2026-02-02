@@ -2,7 +2,7 @@
     /*
 Plugin Name: LocoAI – Auto Translate for Loco Translate
 Description: Auto translation addon for Loco Translate – translate plugin & theme strings using Yandex Translate.
-Version: 2.6
+Version: 2.6.1
 License: GPL2
 Text Domain: loco-auto-translate
 Author: Cool Plugins
@@ -16,7 +16,7 @@ Author URI: https://coolplugins.net/?utm_source=atlt_plugin&utm_medium=inside&ut
     define('ATLT_FILE', __FILE__);
     define('ATLT_URL', plugin_dir_url(ATLT_FILE));
     define('ATLT_PATH', plugin_dir_path(ATLT_FILE));
-    define('ATLT_VERSION', '2.6');
+    define('ATLT_VERSION', '2.6.1');
     ! defined('ATLT_FEEDBACK_API') && define('ATLT_FEEDBACK_API', "https://feedback.coolplugins.net/");
 
     /**
@@ -134,156 +134,175 @@ Author URI: https://coolplugins.net/?utm_source=atlt_plugin&utm_medium=inside&ut
         }
 
         public function atlt_install_plugin()
-        {
+            {
 
-            if (! current_user_can('install_plugins')) {
-                wp_send_json_error([
-                    // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
-                    'errorMessage' => __('Sorry, you are not allowed to install plugins on this site.', 'loco-auto-translate'),
-                ]);
-            }
-
-            check_ajax_referer('alt_install_nonce', '_wpnonce', true);
-
-            if (empty($_POST['slug'])) {
-                wp_send_json_error([
-                    'slug'         => '',
-                    'errorCode'    => 'no_plugin_specified',
-                    // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
-                    'errorMessage' => __('No plugin specified.', 'loco-auto-translate'),
-                ]);
-            }
-
-            $plugin_slug = sanitize_key(wp_unslash($_POST['slug']));
-            $status      = [
-                'install' => 'plugin',
-                'slug'    => sanitize_key(wp_unslash($_POST['slug'])),
-            ];
-
-            require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-            require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-            if ($plugin_slug === 'autopoly-ai-translation-for-polylang-pro') {
-                if (! current_user_can('activate_plugins')) {
-                    wp_send_json_error(['message' => 'Permission denied']);
+                if (! current_user_can('install_plugins')) {
+                    wp_send_json_error([
+                        // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+                        'errorMessage' => __('Sorry, you are not allowed to install plugins on this site.', 'loco-auto-translate'),
+                    ]);
                 }
-                if (! is_plugin_active('polylang/polylang.php')) {
-                    wp_send_json_error(['message' => 'Please activate Polylang plugin first.']);
+
+                check_ajax_referer('alt_install_nonce', '_wpnonce', true);
+
+                if (empty($_POST['slug'])) {
+                    wp_send_json_error([
+                        'slug'         => '',
+                        'errorCode'    => 'no_plugin_specified',
+                        // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+                        'errorMessage' => __('No plugin specified.', 'loco-auto-translate'),
+                    ]);
                 }
-                $plugin_file = 'autopoly-ai-translation-for-polylang-pro/autopoly-ai-translation-for-polylang-pro.php';
-                // Check if plugin is already installed
-                if (file_exists(WP_PLUGIN_DIR . '/' . $plugin_file)) {
-                    // Plugin exists, just activate it
-                    $network_wide = is_multisite();
-                    $result       = activate_plugin($plugin_file, '', $network_wide, true); // ✅ FIXED: Added true
-                    if (is_wp_error($result)) {
-                        wp_send_json_error(['message' => $result->get_error_message()]);
+
+                $plugin_slug = sanitize_key(wp_unslash($_POST['slug']));
+                
+                // Whitelist of allowed plugin slugs - Security fix to prevent arbitrary plugin installation
+                $allowed_plugins = [
+                    'autopoly-ai-translation-for-polylang-pro',
+                    'automatic-translations-for-polylang',
+                    'automatic-translate-addon-pro-for-translatepress',
+                    'automatic-translate-addon-for-translatepress',
+                    'translate-words',
+                ];
+
+                // Validate that the plugin slug is in the whitelist
+                if (! in_array($plugin_slug, $allowed_plugins, true)) {
+                    wp_send_json_error([
+                        'slug'         => $plugin_slug,
+                        'errorCode'    => 'plugin_not_allowed',
+                        // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+                        'errorMessage' => __('This plugin is not allowed to be installed via this interface.', 'loco-auto-translate'),
+                    ]);
+                }
+                
+                $status      = [
+                    'install' => 'plugin',
+                    'slug'    => sanitize_key(wp_unslash($_POST['slug'])),
+                ];
+
+                require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+                require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+                if ($plugin_slug === 'autopoly-ai-translation-for-polylang-pro') {
+                    if (! current_user_can('activate_plugins')) {
+                        wp_send_json_error(['message' => 'Permission denied']);
                     }
-                    wp_send_json_success(['message' => 'Plugin activated successfully']);
-                }
-
-            } elseif ($plugin_slug === 'automatic-translate-addon-pro-for-translatepress') {
-                if (! current_user_can('activate_plugins')) {
-                    wp_send_json_error(['message' => 'Permission denied']);
-                }
-                if (! is_plugin_active('translatepress-multilingual/index.php')) {
-                    wp_send_json_error(['message' => 'Please activate TranslatePress plugin first.']);
-                }
-                $plugin_file = 'automatic-translate-addon-pro-for-translatepress/automatic-translate-addon-for-translatepress-pro.php';
-                // Check if plugin is already installed
-                if (file_exists(WP_PLUGIN_DIR . '/' . $plugin_file)) {
-                    // Plugin exists, just activate it
-                    $network_wide = is_multisite();
-                    $result       = activate_plugin($plugin_file, '', $network_wide, true); // ✅ FIXED: Added true
-                    if (is_wp_error($result)) {
-                        wp_send_json_error(['message' => $result->get_error_message()]);
+                    if (! is_plugin_active('polylang/polylang.php')) {
+                        wp_send_json_error(['message' => 'Please activate Polylang plugin first.']);
                     }
-                    wp_send_json_success(['message' => 'Plugin activated successfully']);
-                }
-            } else {
-                $api = plugins_api('plugin_information', [
-                    'slug'   => $plugin_slug,
-                    'fields' => [
-                        'sections' => false,
-                    ],
-                ]);
-
-                if (is_wp_error($api)) {
-                    $status['errorMessage'] = $api->get_error_message();
-                    wp_send_json_error($status);
-                }
-
-                $status['pluginName'] = $api->name;
-                $skin                 = new WP_Ajax_Upgrader_Skin();
-                $upgrader             = new Plugin_Upgrader($skin);
-                $result               = $upgrader->install($api->download_link);
-
-                if (defined('WP_DEBUG') && WP_DEBUG) {
-                    $status['debug'] = $skin->get_upgrade_messages();
-                }
-
-                if (is_wp_error($result)) {
-                    $status['errorCode']    = $result->get_error_code();
-                    $status['errorMessage'] = $result->get_error_message();
-                    wp_send_json_error($status);
-                } elseif (is_wp_error($skin->result)) {
-                    if ($skin->result->get_error_message() === 'Destination folder already exists.') {
-                        $install_status = install_plugin_install_status($api);
-                        $pagenow        = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
-                        if (current_user_can('activate_plugin', $install_status['file'])) {
-                            $network_wide      = (is_multisite() && 'import' !== $pagenow);
-                            $activation_result = activate_plugin($install_status['file'], '', $network_wide, true); // ✅ FIXED: Added true
-                            if (is_wp_error($activation_result)) {
-                                $status['errorCode']    = $activation_result->get_error_code();
-                                $status['errorMessage'] = $activation_result->get_error_message();
-                                wp_send_json_error($status);
-                            } else {
-                                $status['activated'] = true;
-                            }
-                            wp_send_json_success($status);
+                    $plugin_file = 'autopoly-ai-translation-for-polylang-pro/autopoly-ai-translation-for-polylang-pro.php';
+                    // Check if plugin is already installed
+                    if (file_exists(WP_PLUGIN_DIR . '/' . $plugin_file)) {
+                        // Plugin exists, just activate it
+                        $network_wide = is_multisite();
+                        $result       = activate_plugin($plugin_file, '', $network_wide, true); // ✅ FIXED: Added true
+                        if (is_wp_error($result)) {
+                            wp_send_json_error(['message' => $result->get_error_message()]);
                         }
-                    } else {
-                        $status['errorCode']    = $skin->result->get_error_code();
-                        $status['errorMessage'] = $skin->result->get_error_message();
+                        wp_send_json_success(['message' => 'Plugin activated successfully']);
+                    }
+
+                } elseif ($plugin_slug === 'automatic-translate-addon-pro-for-translatepress') {
+                    if (! current_user_can('activate_plugins')) {
+                        wp_send_json_error(['message' => 'Permission denied']);
+                    }
+                    if (! is_plugin_active('translatepress-multilingual/index.php')) {
+                        wp_send_json_error(['message' => 'Please activate TranslatePress plugin first.']);
+                    }
+                    $plugin_file = 'automatic-translate-addon-pro-for-translatepress/automatic-translate-addon-for-translatepress-pro.php';
+                    // Check if plugin is already installed
+                    if (file_exists(WP_PLUGIN_DIR . '/' . $plugin_file)) {
+                        // Plugin exists, just activate it
+                        $network_wide = is_multisite();
+                        $result       = activate_plugin($plugin_file, '', $network_wide, true); // ✅ FIXED: Added true
+                        if (is_wp_error($result)) {
+                            wp_send_json_error(['message' => $result->get_error_message()]);
+                        }
+                        wp_send_json_success(['message' => 'Plugin activated successfully']);
+                    }
+                } else {
+                    $api = plugins_api('plugin_information', [
+                        'slug'   => $plugin_slug,
+                        'fields' => [
+                            'sections' => false,
+                        ],
+                    ]);
+
+                    if (is_wp_error($api)) {
+                        $status['errorMessage'] = $api->get_error_message();
                         wp_send_json_error($status);
                     }
-                } elseif ($skin->get_errors()->has_errors()) {
-                    $status['errorMessage'] = $skin->get_error_messages();
-                    wp_send_json_error($status);
-                } elseif (is_null($result)) {
-                    global $wp_filesystem;
-                    $status['errorCode'] = 'unable_to_connect_to_filesystem';
-                    // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
-                    $status['errorMessage'] = __('Unable to connect to the filesystem. Please confirm your credentials.', 'loco-auto-translate');
-                    if ($wp_filesystem instanceof WP_Filesystem_Base && is_wp_error($wp_filesystem->errors) && $wp_filesystem->errors->has_errors()) {
-                        $status['errorMessage'] = esc_html($wp_filesystem->errors->get_error_message());
+
+                    $status['pluginName'] = $api->name;
+                    $skin                 = new WP_Ajax_Upgrader_Skin();
+                    $upgrader             = new Plugin_Upgrader($skin);
+                    $result               = $upgrader->install($api->download_link);
+
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        $status['debug'] = $skin->get_upgrade_messages();
                     }
-                    wp_send_json_error($status);
-                }
 
-                $install_status = install_plugin_install_status($api);
-                $pagenow        = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
-
-                // :arrows_counterclockwise: Auto-activate the plugin right after successful install
-                if (current_user_can('activate_plugin', $install_status['file']) && is_plugin_inactive($install_status['file'])) {
-                    $network_wide      = (is_multisite() && 'import' !== $pagenow);
-                    $activation_result = activate_plugin($install_status['file'], '', $network_wide, true); // ✅ FIXED: Added true
-                    if (is_wp_error($activation_result)) {
-                        $status['errorCode']    = $activation_result->get_error_code();
-                        $status['errorMessage'] = $activation_result->get_error_message();
+                    if (is_wp_error($result)) {
+                        $status['errorCode']    = $result->get_error_code();
+                        $status['errorMessage'] = $result->get_error_message();
                         wp_send_json_error($status);
-                    } else {
-                        $status['activated'] = true;
+                    } elseif (is_wp_error($skin->result)) {
+                        if ($skin->result->get_error_message() === 'Destination folder already exists.') {
+                            $install_status = install_plugin_install_status($api);
+                            $pagenow        = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
+                            if (current_user_can('activate_plugin', $install_status['file'])) {
+                                $network_wide      = (is_multisite() && 'import' !== $pagenow);
+                                $activation_result = activate_plugin($install_status['file'], '', $network_wide, true); // ✅ FIXED: Added true
+                                if (is_wp_error($activation_result)) {
+                                    $status['errorCode']    = $activation_result->get_error_code();
+                                    $status['errorMessage'] = $activation_result->get_error_message();
+                                    wp_send_json_error($status);
+                                } else {
+                                    $status['activated'] = true;
+                                }
+                                wp_send_json_success($status);
+                            }
+                        } else {
+                            $status['errorCode']    = $skin->result->get_error_code();
+                            $status['errorMessage'] = $skin->result->get_error_message();
+                            wp_send_json_error($status);
+                        }
+                    } elseif ($skin->get_errors()->has_errors()) {
+                        $status['errorMessage'] = $skin->get_error_messages();
+                        wp_send_json_error($status);
+                    } elseif (is_null($result)) {
+                        global $wp_filesystem;
+                        $status['errorCode'] = 'unable_to_connect_to_filesystem';
+                        // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+                        $status['errorMessage'] = __('Unable to connect to the filesystem. Please confirm your credentials.', 'loco-auto-translate');
+                        if ($wp_filesystem instanceof WP_Filesystem_Base && is_wp_error($wp_filesystem->errors) && $wp_filesystem->errors->has_errors()) {
+                            $status['errorMessage'] = esc_html($wp_filesystem->errors->get_error_message());
+                        }
+                        wp_send_json_error($status);
                     }
-                }
 
-                wp_send_json_success($status);
+                    $install_status = install_plugin_install_status($api);
+                    $pagenow        = isset($_POST['pagenow']) ? sanitize_key($_POST['pagenow']) : '';
+
+                    // :arrows_counterclockwise: Auto-activate the plugin right after successful install
+                    if (current_user_can('activate_plugin', $install_status['file']) && is_plugin_inactive($install_status['file'])) {
+                        $network_wide      = (is_multisite() && 'import' !== $pagenow);
+                        $activation_result = activate_plugin($install_status['file'], '', $network_wide, true); // ✅ FIXED: Added true
+                        if (is_wp_error($activation_result)) {
+                            $status['errorCode']    = $activation_result->get_error_code();
+                            $status['errorMessage'] = $activation_result->get_error_message();
+                            wp_send_json_error($status);
+                        } else {
+                            $status['activated'] = true;
+                        }
+                    }
+
+                    wp_send_json_success($status);
+                }
             }
-        }
 
-        public function atlt_add_docs_link_to_plugin_meta($links, $file)
-        {
+          public function atlt_add_docs_link_to_plugin_meta($links, $file){
             if (plugin_basename(__FILE__) === $file) {
                 $docs_link         = '<a href="' . esc_url('https://locoaddon.com/docs/?utm_source=atlt_plugin&utm_medium=inside&utm_campaign=docs&utm_content=plugins_list') . '" target="_blank" rel="noopener noreferrer">Docs</a>';
                 $multilingual_link = '<a target="_blank" href="' . esc_url(admin_url('plugin-install.php?s=Linguator+Multilingual+AI+Translation&tab=search&type=term')) . '">Create Multilingual Site</a>';
